@@ -1,2 +1,3 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+RELEASE-NOTES.txt merge=union
+
+.configure-files/*.enc binary
