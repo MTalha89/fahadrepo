@@ -72,11 +72,7 @@ class CardReaderHubFragment : BaseFragment(R.layout.fragment_card_reader_hub) {
                     )
                 }
                 is CardReaderHubViewModel.CardReaderHubEvents.NavigateToCardReaderManualsScreen -> {
-                    findNavController().navigate(
-                        CardReaderHubFragmentDirections.actionCardReaderHubFragmentToCardReaderManualsFragment(
-                            event.countryConfig
-                        )
-                    )
+                    findNavController().navigateSafely(R.id.action_cardReaderHubFragment_to_cardReaderManualsFragment)
                 }
                 is CardReaderHubViewModel.CardReaderHubEvents.NavigateToCardReaderOnboardingScreen -> {
                     findNavController().navigate(

@@ -7,7 +7,7 @@ import com.woocommerce.android.screenshots.orders.OrderListScreen
 import com.woocommerce.android.screenshots.products.ProductListScreen
 import com.woocommerce.android.screenshots.util.Screen
 
-class TabNavComponent : Screen(MY_STORE_BUTTON) {
+class TabNavComponent : Screen(PRODUCTS_BUTTON) {
     companion object {
         const val MY_STORE_BUTTON = R.id.dashboard
         const val ORDERS_BUTTON = R.id.orders

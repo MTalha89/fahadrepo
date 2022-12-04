@@ -44,7 +44,7 @@ class ProductsUITest : TestBase() {
     }
 
     @Test
-    fun e2eProductListShowsAllProducts() {
+    fun productListShowsAllProducts() {
         val productsJSONArray = MocksReader().readAllProductsToArray()
 
         for (productJSON in productsJSONArray.iterator()) {

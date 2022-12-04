@@ -1,11 +1,12 @@
 package com.woocommerce.android.ui.mystore.domain
 
-import com.woocommerce.android.WooException
 import com.woocommerce.android.ui.mystore.data.StatsRepository
+import com.woocommerce.android.ui.mystore.domain.GetTopPerformers.TopPerformersResult.TopPerformersError
+import com.woocommerce.android.ui.mystore.domain.GetTopPerformers.TopPerformersResult.TopPerformersSuccess
 import com.woocommerce.android.viewmodel.BaseUnitTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyBoolean
@@ -13,107 +14,68 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.wordpress.android.fluxc.network.BaseRequest
-import org.wordpress.android.fluxc.network.rest.wpcom.wc.WooError
-import org.wordpress.android.fluxc.network.rest.wpcom.wc.WooErrorType
-import org.wordpress.android.fluxc.persistence.entity.TopPerformerProductEntity
+import org.wordpress.android.fluxc.model.leaderboards.WCTopPerformerProductModel
 import org.wordpress.android.fluxc.store.WCStatsStore
 
 @ExperimentalCoroutinesApi
 class GetTopPerformersTest : BaseUnitTest() {
     private val statsRepository: StatsRepository = mock()
 
-    private val sut = GetTopPerformers(
+    private val getTopPerformers = GetTopPerformers(
         statsRepository,
         coroutinesTestRule.testDispatchers
     )
 
     @Test
-    fun `Given fetch top performers success, when get top performers, then returns successful result`() =
+    fun `Given fetch product leader boards success, when get top performers, then emits sorted top performers`() =
         testBlocking {
-            givenFetchTopPerformersResult(Result.success(Unit))
+            givenFetchProductLeaderboardsResult(Result.success(UNORDERED_PERFORMERS_PRODUCT_LIST))
 
-            val result = sut.fetchTopPerformers(
-                granularity = WCStatsStore.StatsGranularity.DAYS,
-                forceRefresh = false,
-                topPerformersCount = ANY_TOP_PERFORMERS_NUMBER
+            val result = getTopPerformers(
+                false, WCStatsStore.StatsGranularity.DAYS, ANY_TOP_PERFORMERS_NUMBER
+            ).first()
+
+            assertThat(result).isEqualTo(
+                TopPerformersSuccess(SORTED_PERFORMERS_PRODUCT_LIST)
             )
-
-            assertThat(result).isEqualTo(Result.success(Unit))
         }
 
     @Test
-    fun `Given fetch top performers error, when get top performers, then returns error`() =
+    fun `Given fetch product leader boards error, when get top performers, then emits top performers error`() =
         testBlocking {
-            val wooException = WooException(WOO_GENERIC_ERROR)
-            givenFetchTopPerformersResult(
-                Result.failure(wooException)
-            )
+            givenFetchProductLeaderboardsResult(REPOSITORY_ERROR_RESULT)
 
-            val result = sut.fetchTopPerformers(
-                granularity = WCStatsStore.StatsGranularity.DAYS,
-                forceRefresh = false,
-                topPerformersCount = ANY_TOP_PERFORMERS_NUMBER
-            )
+            val result = getTopPerformers(
+                false, WCStatsStore.StatsGranularity.DAYS, ANY_TOP_PERFORMERS_NUMBER
+            ).first()
 
-            assertThat(result.exceptionOrNull()).isEqualTo(wooException)
+            assertThat(result).isEqualTo(TopPerformersError)
         }
 
-    @Test
-    fun `observing top performer updates should return the right data`() {
-        testBlocking {
-            val emittedEntity = EXPECTED_TOP_PERFORMERS_ENTITY_LIST
-            givenTopPerformerEntityIsEmitted(emittedEntity)
-
-            val observedDataModel = sut
-                .observeTopPerformers(WCStatsStore.StatsGranularity.DAYS)
-                .first()
-
-            assertThat(observedDataModel).isEqualTo(EXPECTED_TOP_PERFORMER_PRODUCT_LIST)
-        }
-    }
-
-    private fun givenTopPerformerEntityIsEmitted(emittedEntity: List<TopPerformerProductEntity>) {
-        whenever(statsRepository.observeTopPerformers(any())).thenReturn(
-            flowOf(emittedEntity)
-        )
-    }
-
-    private suspend fun givenFetchTopPerformersResult(result: Result<Unit>) {
+    private suspend fun givenFetchProductLeaderboardsResult(result: Result<List<WCTopPerformerProductModel>>) {
         whenever(
-            statsRepository.fetchTopPerformerProducts(
+            statsRepository.fetchProductLeaderboards(
                 anyBoolean(),
                 any(),
                 anyInt()
             )
-        ).thenReturn(result)
+        ).thenReturn(flow { emit(result) })
     }
 
     private companion object {
         const val ANY_TOP_PERFORMERS_NUMBER = 3
-        val WOO_GENERIC_ERROR = WooError(WooErrorType.GENERIC_ERROR, BaseRequest.GenericErrorType.UNKNOWN)
-        val EXPECTED_TOP_PERFORMERS_ENTITY_LIST = listOf(
-            TopPerformerProductEntity(
-                siteId = 1234,
-                granularity = "DAYS",
-                productId = 134,
-                name = "Shirt",
-                imageUrl = "",
-                quantity = 4,
-                currency = "USD",
-                total = 10.50,
-                millisSinceLastUpdated = 0
-            )
+        const val ANY_ERROR_MESSAGE = "Error message"
+        val REPOSITORY_ERROR_RESULT: Result<List<WCTopPerformerProductModel>> =
+            Result.failure(Exception(ANY_ERROR_MESSAGE))
+        val UNORDERED_PERFORMERS_PRODUCT_LIST = listOf(
+            WCTopPerformerProductModel(quantity = 3, total = 3 * 10.toDouble()),
+            WCTopPerformerProductModel(quantity = 1, total = 15.toDouble()),
+            WCTopPerformerProductModel(quantity = 5, total = 5 * 5.toDouble())
         )
-        val EXPECTED_TOP_PERFORMER_PRODUCT_LIST = listOf(
-            GetTopPerformers.TopPerformerProduct(
-                productId = 134,
-                name = "Shirt",
-                imageUrl = "",
-                quantity = 4,
-                currency = "USD",
-                total = 10.50,
-            )
+        val SORTED_PERFORMERS_PRODUCT_LIST = listOf(
+            WCTopPerformerProductModel(quantity = 5, total = 5 * 5.toDouble()),
+            WCTopPerformerProductModel(quantity = 3, total = 3 * 10.toDouble()),
+            WCTopPerformerProductModel(quantity = 1, total = 15.toDouble())
         )
     }
 }

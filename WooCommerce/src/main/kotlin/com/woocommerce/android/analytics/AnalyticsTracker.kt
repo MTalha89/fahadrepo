@@ -240,6 +240,10 @@ class AnalyticsTracker private constructor(private val context: Context) {
             SYSTEM("system")
         }
 
+        const val KEY_VALIDATION_SCENARIO = "validation_scenario"
+        const val VALUE_VALIDATION_SCENARIO_LOCAL = "local"
+        const val VALUE_VALIDATION_SCENARIO_REMOTE = "remote"
+
         const val KEY_FEEDBACK_ACTION = "action"
         const val KEY_FEEDBACK_CONTEXT = "context"
         const val VALUE_FEEDBACK_GENERAL_CONTEXT = "general"
@@ -370,9 +374,6 @@ class AnalyticsTracker private constructor(private val context: Context) {
         const val VALUE_JETPACK_INSTALLATION_SOURCE_WEB = "web"
         const val VALUE_JETPACK_INSTALLATION_SOURCE_NATIVE = "native"
 
-        // -- Login with WordPress.com account flow
-        const val VALUE_LOGIN_WITH_WORDPRESS_COM = "wordpress_com"
-
         // -- Upsell banner
         const val KEY_BANNER_SOURCE = "source"
         const val KEY_BANNER_PAYMENTS = "payment_methods"
@@ -399,9 +400,6 @@ class AnalyticsTracker private constructor(private val context: Context) {
 
         // Widgets
         const val KEY_WIDGETS = "widgets"
-
-        // -- App links
-        const val KEY_PATH = "path"
 
         var sendUsageStats: Boolean = true
             set(value) {

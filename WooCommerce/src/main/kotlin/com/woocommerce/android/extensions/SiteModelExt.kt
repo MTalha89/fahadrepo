@@ -23,9 +23,8 @@ val SiteModel.stateLogInformation: String
 
 fun SiteModel.getSiteName(): String = if (!TextUtils.isEmpty(name)) name else ""
 
-fun SiteModel?.getTitle(default: String): String {
+fun SiteModel.getTitle(default: String): String {
     return when {
-        this == null -> default
         displayName.isNotNullOrEmpty() -> displayName
         name.isNotNullOrEmpty() -> name
         else -> default

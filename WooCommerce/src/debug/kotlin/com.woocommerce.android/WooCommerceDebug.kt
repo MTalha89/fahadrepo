@@ -31,7 +31,7 @@ class WooCommerceDebug : WooCommerce() {
             }.start()
         }
         super.onCreate()
-        enableStrictMode()
+        //enableStrictMode()
     }
 
     /**

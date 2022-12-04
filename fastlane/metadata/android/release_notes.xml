@@ -1,68 +1,85 @@
 <ar>
-10.7:
-بالنسبة إلى هذا الإصدار، عززنا تدفق تسجيل الدخول من خلال تحسين الملء التلقائي وخيار الاتصال بـ Jetpack، في حال عدم الاتصال بـ Jetpack. أصلحنا أيضًا التباين بين الإحصاءات الشهرية وإحصاءات الزائرين. مرحى، الرياضيات! حافظ على تدفق ملاحظاتك؛ حيث إنها تساعدنا على تحديد ما يجب العمل عليه فيما بعد. 💜
+10.4:
+يحتوي هذا الإصدار كذلك على مجموعة من التحسينات الطفيفة لجعل تجربتك أكثر سلاسة. نأمل أن تلاحظ الحب الذي وضعناه في برنامجنا.
+
 </ar>
 <de-DE>
-10.7:
-Für diese Version haben wir den Anmeldevorgang optimiert mit besserer automatischer Eingabe und einer Option zum Verbinden von Jetpack, sollte es nicht verbunden sein. Wir haben auch eine Diskrepanz zwischen den monatlichen und den Besucherstatistiken behoben. Yay, Mathe! Sende uns weiterhin Feedback! So finden wir heraus, was wir als Nächstes optimieren können. 💜
+10.4: 
+Diese Version enthält ein paar kleinere Verbesserungen am Gesamterlebnis. Wir hoffen, dass dir unsere Bemühungen auffallen und sie dir weiterhelfen.
+
 </de-DE>
 <es-ES>
-10.7:
-En esta versión, hemos mejorado el flujo de acceso gracias a una mejora de la función para autocompletar y una opción para conectar Jeckpack si no está conectado. También hemos solucionado una discrepancia entre las estadísticas mensuales y las de los visitantes. ¡Vivan las estadísticas! Sigue compartiendo tus opiniones, ya que nos ayudan a averiguar en qué debemos trabajar. 💜
+10.4:
+Esta versión incluye algunas pequeñas mejoras para que la experiencia sea más fluida. Esperamos que seas consciente del cariño que le ponemos a nuestro software.
+
 </es-ES>
 <fr-FR>
-10.7 :
-Pour cette version, nous avons amélioré le flux de connexion avec un remplissage automatique optimisé et une option permettant de connecter Jetpack, le cas échéant. Nous avons également corrigé un écart entre les statistiques mensuelles et de trafic. Vive les maths ! Continuez à nous faire part de vos commentaires ; ils nous aident à nous améliorer. 💜
+10.4:
+Cette version contient quelques améliorations mineures qui rendent votre expérience plus fluide. Nous espérons que vous remarquerez tout l’amour que nous mettons dans notre logiciel.
+
 </fr-FR>
 <iw-IL>
-10.7:
-בגרסה הזאת, שיפרנו את תהליך ההתחברות, עם מילוי אוטומטי טוב יותר ועם אפשרות לחבר את Jetpack במידה והשירות לא מחובר. בנוסף, שיפרנו חוסר התאמה בין הנתונים הסטטיסטיים של החודש ושל המבקרים. Yay מתמטיקה! נשמח להמשיך לקבל משוב, זה עוזר לנו להבין על מה כדאי לנו לעבוד בשלב הבא. 💜
+10.4:
+בגרסה הזאת הוספנו כמה שיפורים קטנים כדי לאפשר חוויית שימוש יעילה יותר. אנחנו מקווים שאפשר לראות כמה אנחנו אוהבים לבנות את התוכנה שלנו.
+
 </iw-IL>
 <id>
-10.7:
-Dalam rilis ini, kami menyempurnakan alur login dengan memperbaiki pengisian otomatis dan pilihan untuk menghubungkan Jetpack jika Jetpack tidak terhubung. Kami juga memperbaiki perbedaan antara statistik bulanan dan statistik pengunjung. Mari berhitung! Terus kirimkan feedback Anda untuk memberi tahu kami apa yang harus ditingkatkan selanjutnya. 💜
+10.4:
+Rilis ini memuat berbagai perbaikan minor agar pengalaman Anda makin mulus. Kami harap Anda menyukai upaya yang kami berikan dalam perangkat lunak kami.
+
 </id>
 <it-IT>
-10.7:
-Per questa versione, abbiamo migliorato il flusso di accesso con una migliore compilazione automatica e un'opzione per connettere Jetpack, se Jetpack non è connesso. Abbiamo anche corretto una discrepanza tra le statistiche mensili e quelle dei visitatori. Ah, la matematica! Continua a inviarci il tuo feedback; ci aiuta a capire su cosa lavorare in futuro. 💜
+10.4:
+Questa versione contiene alcuni miglioramenti minori per rendere la tua esperienza più fluida. Speriamo si noti l'amore che mettiamo nel nostro software.
+
 </it-IT>
 <ja-JP>
-10.7:
-このリリースでは、自動入力機能と、Jetpack に接続していない場合の Jetpack への接続オプションを改良して、ログインフローを改善しました。 月次と訪問者の統計間の不整合も修正しました。 算数バンザイ ! 引き続きフィードバックをお待ちしております。いただいたご意見は、今後の製品改善に役立たせていただきます。 💜
+10.4:
+今回のリリースでは、ご利用環境をスムーズにするための、数多くの小さな改善が施されています。 当社のソフトウェアに対する愛を感じていただければ幸いです。
+
 </ja-JP>
 <ko-KR>
-10.7:
-이 릴리스에서는 더 나은 자동 완성과 젯팩이 연결되지 않은 경우 젯팩을 연결하는 옵션으로 로그인 절차를 개선했습니다. 월간 통계와 방문자 통계 사이의 불일치도 해결했습니다. 수학적입니다! 피드백을 계속 보내주세요. 다음에 작업할 내용을 파악하는 데 도움이 됩니다. 💜
+10.4:
+이 릴리스에는 더 원활한 환경을 위한 소소한 개선 사항이 몇 가지 포함되어 있습니다. 당사에서 소프트웨어에 쏟는 애정을 알아주시면 좋겠습니다.
+
 </ko-KR>
 <nl-NL>
-10.7:
-Voor deze release hebben we het inlogproces verbeterd. Automatisch invullen is verbeterd en we hebben een optie toegevoegd om Jetpack te koppelen als Jetpack nog niet is gekoppeld. We hebben ook een verschil tussen de maandelijkse en de bezoekersstatistieken opgelost. Wiskunde is geweldig! Blijf komen met jullie feedback; dat helpt ons kiezen waar we aan moeten werken. 💜
+10.4:
+Deze release bevat tal van kleine verbeteringen om je ervaring soepeler te laten verlopen. We hopen dat je merkt dat we dit met liefde doen.
+
 </nl-NL>
 <pt-BR>
-10.7:
-Para este lançamento, otimizamos o fluxo de login com um melhor preenchimento automático e uma opção para conectar o Jetpack, caso ele não esteja conectado. Também corrigimos uma inconsistência entre as estatísticas mensais e as estatísticas dos visitantes. Viva a matemática! Continue dando feedback, ele nos ajuda a saber no que trabalhar em seguida. 💜
+10.4:
+This release contains a handful of minor improvements to make your experience smoother. We hope you notice the love we put into our software.
+
 </pt-BR>
 <ru-RU>
-10.7:
-В этом выпуске усовершенствована процедура входа благодаря улучшенной функции автозаполнения и опции подключения плагина Jetpack, если он ещё не подключён. Кроме того, устранены несоответствия между статистикой по месяцам и посетителям. Да здравствует математика! Оставляйте свои отзывы, они помогают нам выявлять области для дальнейшего улучшения. 💜
+10.4:
+В настоящей версии содержатся небольшие усовершенствования, повышающие удобство работы. Надеемся, вы оцените наши старания.
+
 </ru-RU>
 <sv-SE>
-10.7:
-I den här versionen har vi förbättrat inloggningsflödet med bättre automatisk ifyllning och möjlighet att ansluta Jetpack, om Jetpack inte är anslutet. Vi har också åtgärdat en avvikelse mellan månads- och besöksstatistiken. Hurra för matematik! Fortsätt att lämna feedback. Det hjälper oss att lista ut vad vi ska hitta på härnäst. 💜
+10.4:
+Den här versionen innehåller en handfull mindre förbättringar som ska göra din upplevelse smidigare. Vi hoppas att du kommer att märka hur mycket arbete vi lägger ned på vår programvara.
+
 </sv-SE>
 <tr-TR>
-10.7:
-Bu sürümde, daha iyi otomatik doldurma ve Jetpack bağlı değilse Jetpack'e bağlanma seçeneği ile oturum açma akışını iyileştirdik. Aylık istatistikler ve ziyaretçi istatistikleri arasındaki tutarsızlığı da düzelttik. Yaşasın matematik! Geri bildirimleriniz devam etsin; üzerinde çalışacağımız sıradaki özelliği bulmamıza yardımcı oluyor. 💜
+10.4:
+Bu sürüm, deneyiminizi daha sorunsuz hale getirmek için birkaç küçük iyileştirme içerir. Yazılımımıza gönlümüzden kattığımız sevgiyi fark edeceğinizi umuyoruz.
+
 </tr-TR>
 <zh-CN>
-10.7：
-在此版本中，我们通过优化自动填充功能并添加连接到 Jetpack（如果未连接 Jetpack）的选项，改进了登录流程。 我们还修复了月度统计和访客统计间的差异。 数学的魅力无穷！ 请随时提供您的反馈，为我们接下来的工作提供灵感。💜
+10.4：
+此版本包含一系列细微的改进，让您的体验更加流畅。 希望您能够在软件中感受到我们的关怀。
+
 </zh-CN>
 <zh-TW>
-10.7：
-我們在這個版本改善了登入流程，提供了更方便的自動填寫功能，未與 Jetpack 連結時，還會提供連結 Jetpack 選項。 我們也修復了每月統計資料和訪客統計資料之間的不一致。 數學問題是不是很有趣呢！ 歡迎提供意見回饋；這有助於我們找到接下來努力的方向。💜
+10.4：
+此版本包含一些微幅改善，可讓你的使用體驗更加流暢。 希望你能感受到我們對軟體投注的熱忱。
+
 </zh-TW>
 <en-US>
-10.7:
-For this release, we improved the login flow with better autofill and an option to connect Jetpack, if Jetpack is not connected. We also fixed a discrepancy between the monthly and the visitor stats. Yay math! Keep your feedback rolling in; it helps us figure out what to work on next. 💜
+10.4:
+This release contains a handful of minor improvements to make your experience smoother. We hope you notice the love we put into our software.
+
 </en-US>

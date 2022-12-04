@@ -5,11 +5,9 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.woocommerce.android.R
 import com.woocommerce.android.databinding.FragmentOrderCreateEditCustomerAddressBinding
@@ -39,9 +37,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OrderCreateEditCustomerAddFragment :
-    BaseFragment(R.layout.fragment_order_create_edit_customer_address),
-    MenuProvider {
+class OrderCreateEditCustomerAddFragment : BaseFragment(R.layout.fragment_order_create_edit_customer_address) {
     private companion object {
         const val SELECT_BILLING_COUNTRY_REQUEST = "select_billing_country_request"
         const val SELECT_BILLING_STATE_REQUEST = "select_billing_state_request"
@@ -63,7 +59,7 @@ class OrderCreateEditCustomerAddFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        setHasOptionsMenu(true)
         inflateLayout(view)
         setupLocationHandling()
         observeEvents()
@@ -263,7 +259,8 @@ class OrderCreateEditCustomerAddFragment :
         findNavController().navigateSafely(action)
     }
 
-    override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
 
         if (FeatureFlag.ORDER_CREATION_CUSTOMER_SEARCH.isEnabled()) {
@@ -284,7 +281,7 @@ class OrderCreateEditCustomerAddFragment :
         }
     }
 
-    override fun onMenuItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_done -> {
                 addressViewModel.onDoneSelected(

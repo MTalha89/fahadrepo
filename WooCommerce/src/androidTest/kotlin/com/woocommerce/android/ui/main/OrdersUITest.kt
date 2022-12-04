@@ -44,7 +44,7 @@ class OrdersUITest : TestBase() {
     }
 
     @Test
-    fun e2eCreateOrderTest() {
+    fun createOrderTest() {
         val firstName = "Mira"
         val note = "Customer notes 123~"
         val status = "Processing"

@@ -10,10 +10,8 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.view.MenuProvider
 import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
-import androidx.lifecycle.Lifecycle.State
 import androidx.navigation.fragment.findNavController
 import com.woocommerce.android.R
 import com.woocommerce.android.ui.base.BaseFragment
@@ -28,8 +26,7 @@ import javax.inject.Inject
 class CustomerListFragment :
     BaseFragment(),
     MenuItem.OnActionExpandListener,
-    SearchView.OnQueryTextListener,
-    MenuProvider {
+    SearchView.OnQueryTextListener {
     @Inject lateinit var uiMessageResolver: UIMessageResolver
 
     private val viewModel by viewModels<CustomerListViewModel>()
@@ -40,7 +37,7 @@ class CustomerListFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        requireActivity().addMenuProvider(this, viewLifecycleOwner, State.RESUMED)
+        setHasOptionsMenu(true)
         setupObservers()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -69,7 +66,7 @@ class CustomerListFragment :
         }
     }
 
-    override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_search, menu)
 
         menu.findItem(R.id.menu_search)?.let { searchMenuItem ->
@@ -81,9 +78,9 @@ class CustomerListFragment :
                 searchView.setOnQueryTextListener(this)
             }
         }
-    }
 
-    override fun onMenuItemSelected(menuItem: MenuItem) = false
+        super.onCreateOptionsMenu(menu, inflater)
+    }
 
     override fun onMenuItemActionExpand(item: MenuItem) = true
 

@@ -2,7 +2,6 @@ package com.woocommerce.android.ui.mystore
 
 import androidx.lifecycle.SavedStateHandle
 import com.woocommerce.android.AppPrefsWrapper
-import com.woocommerce.android.WooException
 import com.woocommerce.android.analytics.AnalyticsEvent
 import com.woocommerce.android.analytics.AnalyticsTracker
 import com.woocommerce.android.analytics.AnalyticsTrackerWrapper
@@ -10,7 +9,6 @@ import com.woocommerce.android.tools.NetworkStatus
 import com.woocommerce.android.tools.SelectedSite
 import com.woocommerce.android.ui.mystore.domain.GetStats
 import com.woocommerce.android.ui.mystore.domain.GetTopPerformers
-import com.woocommerce.android.ui.mystore.domain.GetTopPerformers.TopPerformerProduct
 import com.woocommerce.android.util.CurrencyFormatter
 import com.woocommerce.android.viewmodel.BaseUnitTest
 import com.woocommerce.android.viewmodel.ResourceProvider
@@ -20,7 +18,6 @@ import kotlinx.coroutines.flow.flow
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -28,11 +25,11 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.wordpress.android.fluxc.model.SiteModel
-import org.wordpress.android.fluxc.network.BaseRequest
-import org.wordpress.android.fluxc.network.rest.wpcom.wc.WooError
-import org.wordpress.android.fluxc.network.rest.wpcom.wc.WooErrorType
+import org.wordpress.android.fluxc.model.WCProductModel
+import org.wordpress.android.fluxc.model.leaderboards.WCTopPerformerProductModel
 import org.wordpress.android.fluxc.store.WCStatsStore.StatsGranularity
 import org.wordpress.android.fluxc.store.WooCommerceStore
+import java.math.BigDecimal
 import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
@@ -54,7 +51,7 @@ class MyStoreViewModelTest : BaseUnitTest() {
     @Before
     fun setup() = testBlocking {
         givenStatsLoadingResult(GetStats.LoadStatsResult.VisitorsStatsError)
-        givenFetchTopPerformersResult(Result.failure(WooException(WOO_GENERIC_ERROR)))
+        givenToPerformersResult(GetTopPerformers.TopPerformersResult.TopPerformersError)
     }
 
     @Test
@@ -65,11 +62,7 @@ class MyStoreViewModelTest : BaseUnitTest() {
             whenViewModelIsCreated()
 
             verify(getStats).invoke(refresh = true, DEFAULT_STATS_GRANULARITY)
-            verify(getTopPerformers).fetchTopPerformers(
-                DEFAULT_STATS_GRANULARITY,
-                forceRefresh = true,
-                ANY_TOP_PERFORMERS_COUNT
-            )
+            verify(getTopPerformers).invoke(forceRefresh = true, DEFAULT_STATS_GRANULARITY, ANY_TOP_PERFORMERS_COUNT)
         }
 
     @Test
@@ -91,7 +84,7 @@ class MyStoreViewModelTest : BaseUnitTest() {
             whenViewModelIsCreated()
 
             verify(getStats, never()).invoke(any(), any())
-            verify(getTopPerformers, never()).fetchTopPerformers(any(), any(), any())
+            verify(getTopPerformers, never()).invoke(any(), any(), any())
         }
 
     @Test
@@ -115,7 +108,7 @@ class MyStoreViewModelTest : BaseUnitTest() {
             sut.onStatsGranularityChanged(ANY_SELECTED_STATS_GRANULARITY)
 
             verify(getStats, never()).invoke(any(), any())
-            verify(getTopPerformers, never()).fetchTopPerformers(any(), any(), any())
+            verify(getTopPerformers, never()).invoke(any(), any(), any())
         }
 
     @Test
@@ -128,9 +121,9 @@ class MyStoreViewModelTest : BaseUnitTest() {
             sut.onStatsGranularityChanged(ANY_SELECTED_STATS_GRANULARITY)
 
             verify(getStats).invoke(refresh = false, ANY_SELECTED_STATS_GRANULARITY)
-            verify(getTopPerformers).fetchTopPerformers(
-                ANY_SELECTED_STATS_GRANULARITY,
+            verify(getTopPerformers).invoke(
                 forceRefresh = false,
+                ANY_SELECTED_STATS_GRANULARITY,
                 ANY_TOP_PERFORMERS_COUNT
             )
         }
@@ -145,9 +138,9 @@ class MyStoreViewModelTest : BaseUnitTest() {
             sut.onStatsGranularityChanged(ANY_SELECTED_STATS_GRANULARITY)
 
             verify(getStats).invoke(refresh = true, ANY_SELECTED_STATS_GRANULARITY)
-            verify(getTopPerformers).fetchTopPerformers(
-                ANY_SELECTED_STATS_GRANULARITY,
+            verify(getTopPerformers).invoke(
                 forceRefresh = true,
+                ANY_SELECTED_STATS_GRANULARITY,
                 ANY_TOP_PERFORMERS_COUNT
             )
         }
@@ -161,9 +154,9 @@ class MyStoreViewModelTest : BaseUnitTest() {
             sut.onSwipeToRefresh()
 
             verify(getStats).invoke(refresh = true, DEFAULT_STATS_GRANULARITY)
-            verify(getTopPerformers).fetchTopPerformers(
-                DEFAULT_STATS_GRANULARITY,
+            verify(getTopPerformers).invoke(
                 forceRefresh = true,
+                DEFAULT_STATS_GRANULARITY,
                 ANY_TOP_PERFORMERS_COUNT
             )
         }
@@ -335,16 +328,40 @@ class MyStoreViewModelTest : BaseUnitTest() {
         }
 
     @Test
+    fun `Given top performers load success, When stats granularity changes, Then UI is updated with top performers`() =
+        testBlocking {
+            whenViewModelIsCreated()
+            givenNetworkConnectivity(connected = true)
+            givenToPerformersResult(GetTopPerformers.TopPerformersResult.TopPerformersSuccess(emptyList()))
+
+            sut.onStatsGranularityChanged(ANY_SELECTED_STATS_GRANULARITY)
+
+            assertThat(sut.topPerformersState.value).isEqualTo(
+                MyStoreViewModel.TopPerformersViewState.Content(emptyList(), ANY_SELECTED_STATS_GRANULARITY)
+            )
+        }
+
+    @Test
     fun `Given top performers load success, When clicked, Then analytics is tracked`() =
         testBlocking {
-            givenCurrencyFormatter(TOP_PERFORMER_PRODUCT.total, TOP_PERFORMER_PRODUCT.currency)
+            val topPerformerModel = mock<WCTopPerformerProductModel> {
+                on(it.currency).thenReturn("USD")
+                on(it.product).thenReturn(WCProductModel())
+            }
+            givenCurrencyFormatter(BigDecimal("0.0"), "USD")
             givenResourceProvider()
             givenNetworkConnectivity(connected = true)
-            givenFetchTopPerformersResult(Result.success(Unit))
-            givenObserveTopPerformersEmits(listOf(TOP_PERFORMER_PRODUCT))
+            givenToPerformersResult(
+                GetTopPerformers.TopPerformersResult.TopPerformersSuccess(
+                    listOf(
+                        topPerformerModel
+                    )
+                )
+            )
 
             whenViewModelIsCreated()
-            sut.topPerformersState.value!!.topPerformers[0].onClick.invoke(1L)
+            (sut.topPerformersState.value as MyStoreViewModel.TopPerformersViewState.Content)
+                .topPerformers[0].onClick.invoke(1L)
 
             verify(analyticsTrackerWrapper).track(AnalyticsEvent.TOP_EARNER_PRODUCT_TAPPED)
         }
@@ -354,7 +371,7 @@ class MyStoreViewModelTest : BaseUnitTest() {
         testBlocking {
             whenViewModelIsCreated()
             givenNetworkConnectivity(connected = true)
-            givenFetchTopPerformersResult(Result.success(Unit))
+            givenToPerformersResult(GetTopPerformers.TopPerformersResult.TopPerformersSuccess(emptyList()))
 
             sut.onStatsGranularityChanged(ANY_SELECTED_STATS_GRANULARITY)
 
@@ -369,11 +386,13 @@ class MyStoreViewModelTest : BaseUnitTest() {
         testBlocking {
             whenViewModelIsCreated()
             givenNetworkConnectivity(connected = true)
-            givenFetchTopPerformersResult(Result.failure(WooException(WOO_GENERIC_ERROR)))
+            givenToPerformersResult(GetTopPerformers.TopPerformersResult.TopPerformersError)
 
             sut.onStatsGranularityChanged(ANY_SELECTED_STATS_GRANULARITY)
 
-            assertTrue(sut.topPerformersState.value!!.isError)
+            assertThat(sut.topPerformersState.value).isEqualTo(
+                MyStoreViewModel.TopPerformersViewState.Error
+            )
         }
 
     @Test
@@ -401,18 +420,12 @@ class MyStoreViewModelTest : BaseUnitTest() {
         whenever(getStats.invoke(any(), any())).thenReturn(flow { emit(result) })
     }
 
-    private suspend fun givenFetchTopPerformersResult(result: Result<Unit>) {
-        whenever(
-            getTopPerformers.fetchTopPerformers(
-                any(),
-                anyBoolean(),
-                anyInt()
-            )
-        ).thenReturn(result)
+    private suspend fun givenToPerformersResult(result: GetTopPerformers.TopPerformersResult) {
+        whenever(getTopPerformers.invoke(any(), any(), any())).thenReturn(flow { emit(result) })
     }
 
-    private fun givenCurrencyFormatter(amount: Double, currency: String) {
-        whenever(currencyFormatter.formatCurrency(amount.toBigDecimal(), currency)).thenReturn("1.00")
+    private fun givenCurrencyFormatter(amount: BigDecimal, currency: String) {
+        whenever(currencyFormatter.formatCurrency(amount, currency)).thenReturn("1.00")
     }
 
     private fun givenResourceProvider() {
@@ -427,13 +440,6 @@ class MyStoreViewModelTest : BaseUnitTest() {
     private fun givenStatsForGranularityNotCached(granularity: StatsGranularity) {
         sut.refreshStoreStats[granularity.ordinal] = true
         sut.refreshTopPerformerStats[granularity.ordinal] = true
-    }
-
-    private fun givenObserveTopPerformersEmits(topPerformers: List<TopPerformerProduct>) {
-        whenever(getTopPerformers.observeTopPerformers(any()))
-            .thenReturn(
-                flow { emit(topPerformers) }
-            )
     }
 
     private fun whenViewModelIsCreated() {
@@ -462,14 +468,5 @@ class MyStoreViewModelTest : BaseUnitTest() {
         val DEFAULT_STATS_GRANULARITY = StatsGranularity.DAYS
         val ANY_SELECTED_STATS_GRANULARITY = StatsGranularity.WEEKS
         const val ANY_TOP_PERFORMERS_COUNT = 5
-        val WOO_GENERIC_ERROR = WooError(WooErrorType.GENERIC_ERROR, BaseRequest.GenericErrorType.UNKNOWN)
-        val TOP_PERFORMER_PRODUCT = TopPerformerProduct(
-            productId = 123,
-            name = "name",
-            quantity = 1,
-            currency = "USD",
-            total = 1.5,
-            imageUrl = null
-        )
     }
 }

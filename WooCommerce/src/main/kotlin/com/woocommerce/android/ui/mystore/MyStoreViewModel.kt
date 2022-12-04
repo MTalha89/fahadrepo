@@ -27,21 +27,20 @@ import com.woocommerce.android.ui.mystore.domain.GetStats.LoadStatsResult.Revenu
 import com.woocommerce.android.ui.mystore.domain.GetStats.LoadStatsResult.VisitorsStatsError
 import com.woocommerce.android.ui.mystore.domain.GetStats.LoadStatsResult.VisitorsStatsSuccess
 import com.woocommerce.android.ui.mystore.domain.GetTopPerformers
-import com.woocommerce.android.ui.mystore.domain.GetTopPerformers.TopPerformerProduct
+import com.woocommerce.android.ui.mystore.domain.GetTopPerformers.TopPerformersResult.TopPerformersError
+import com.woocommerce.android.ui.mystore.domain.GetTopPerformers.TopPerformersResult.TopPerformersSuccess
 import com.woocommerce.android.util.CurrencyFormatter
 import com.woocommerce.android.viewmodel.MultiLiveEvent
 import com.woocommerce.android.viewmodel.ResourceProvider
 import com.woocommerce.android.viewmodel.ScopedViewModel
 import com.woocommerce.android.viewmodel.getStateFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
@@ -50,6 +49,7 @@ import org.apache.commons.text.StringEscapeUtils
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.wordpress.android.fluxc.model.WCRevenueStatsModel
+import org.wordpress.android.fluxc.model.leaderboards.WCTopPerformerProductModel
 import org.wordpress.android.fluxc.store.WCStatsStore.StatsGranularity
 import org.wordpress.android.fluxc.store.WooCommerceStore
 import org.wordpress.android.util.FormatUtils
@@ -75,6 +75,7 @@ class MyStoreViewModel @Inject constructor(
     private val explat: ExPlat
 ) : ScopedViewModel(savedState) {
     private companion object {
+        const val NUM_TOP_PERFORMERS = 5
         const val DAYS_TO_REDISPLAY_JP_BENEFITS_BANNER = 5
     }
 
@@ -86,8 +87,8 @@ class MyStoreViewModel @Inject constructor(
     private var _visitorStatsState = MutableLiveData<VisitorStatsViewState>()
     val visitorStatsState: LiveData<VisitorStatsViewState> = _visitorStatsState
 
-    private var _topPerformersState = MutableLiveData<TopPerformersState>()
-    val topPerformersState: LiveData<TopPerformersState> = _topPerformersState
+    private var _topPerformersState = MutableLiveData<TopPerformersViewState>()
+    val topPerformersState: LiveData<TopPerformersViewState> = _topPerformersState
 
     private var _hasOrders = MutableLiveData<OrderState>()
     val hasOrders: LiveData<OrderState> = _hasOrders
@@ -105,9 +106,6 @@ class MyStoreViewModel @Inject constructor(
     init {
         ConnectionChangeReceiver.getEventBus().register(this)
         initExPlat()
-
-        _topPerformersState.value = TopPerformersState(isLoading = true)
-
         viewModelScope.launch {
             combine(
                 _activeStatsGranularity,
@@ -121,7 +119,6 @@ class MyStoreViewModel @Inject constructor(
                 }
             }
         }
-        observeTopPerformerUpdates()
     }
 
     override fun onCleared() {
@@ -242,6 +239,7 @@ class MyStoreViewModel @Inject constructor(
     private suspend fun loadTopPerformersStats(granularity: StatsGranularity) {
         if (!networkStatus.isConnected()) {
             refreshTopPerformerStats[granularity.ordinal] = true
+            _topPerformersState.value = TopPerformersViewState.Content(emptyList(), granularity)
             return
         }
 
@@ -250,30 +248,33 @@ class MyStoreViewModel @Inject constructor(
             refreshTopPerformerStats[granularity.ordinal] = false
         }
 
-        _topPerformersState.value = _topPerformersState.value?.copy(isLoading = true, isError = false)
-        val result = getTopPerformers.fetchTopPerformers(granularity, forceRefresh)
-        result.fold(
-            onFailure = { _topPerformersState.value = _topPerformersState.value?.copy(isError = true) },
-            onSuccess = {
-                analyticsTrackerWrapper.track(
-                    AnalyticsEvent.DASHBOARD_TOP_PERFORMERS_LOADED,
-                    mapOf(AnalyticsTracker.KEY_RANGE to granularity.name.lowercase())
-                )
+        _topPerformersState.value = TopPerformersViewState.Loading
+        getTopPerformers(forceRefresh, granularity, NUM_TOP_PERFORMERS)
+            .collect {
+                when (it) {
+                    is TopPerformersSuccess -> {
+                        _topPerformersState.value =
+                            TopPerformersViewState.Content(
+                                it.topPerformers.toTopPerformersUiList(),
+                                granularity
+                            )
+                        analyticsTrackerWrapper.track(
+                            AnalyticsEvent.DASHBOARD_TOP_PERFORMERS_LOADED,
+                            mapOf(AnalyticsTracker.KEY_RANGE to granularity.name.lowercase())
+                        )
+                    }
+                    TopPerformersError -> _topPerformersState.value = TopPerformersViewState.Error
+                }
+                myStoreTransactionLauncher.onTopPerformersFetched()
             }
-        )
-        _topPerformersState.value = _topPerformersState.value?.copy(isLoading = false)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun observeTopPerformerUpdates() {
-        viewModelScope.launch {
-            _activeStatsGranularity
-                .flatMapLatest { granularity -> getTopPerformers.observeTopPerformers(granularity) }
-                .collectLatest {
-                    _topPerformersState.value = _topPerformersState.value?.copy(
-                        topPerformers = it.toTopPerformersUiList(),
-                    )
-                }
+    private fun resetForceRefresh() {
+        refreshTopPerformerStats.forEachIndexed { index, _ ->
+            refreshTopPerformerStats[index] = true
+        }
+        refreshStoreStats.forEachIndexed { index, _ ->
+            refreshStoreStats[index] = true
         }
     }
 
@@ -302,29 +303,20 @@ class MyStoreViewModel @Inject constructor(
             )
         }
 
-    private fun List<TopPerformerProduct>.toTopPerformersUiList() = map { it.toTopPerformersUiModel() }
+    private fun List<WCTopPerformerProductModel>.toTopPerformersUiList() = map { it.toTopPerformersUiModel() }
 
-    private fun TopPerformerProduct.toTopPerformersUiModel() =
+    private fun WCTopPerformerProductModel.toTopPerformersUiModel() =
         TopPerformerProductUiModel(
-            productId = productId,
-            name = StringEscapeUtils.unescapeHtml4(name),
+            productId = product.remoteProductId,
+            name = StringEscapeUtils.unescapeHtml4(product.name),
             timesOrdered = FormatUtils.formatDecimal(quantity),
             netSales = resourceProvider.getString(
                 R.string.dashboard_top_performers_net_sales,
                 getTotalSpendFormatted(total.toBigDecimal(), currency)
             ),
-            imageUrl = imageUrl?.toImageUrl(),
+            imageUrl = product.getFirstImageUrl()?.toImageUrl(),
             onClick = ::onTopPerformerSelected
         )
-
-    private fun resetForceRefresh() {
-        refreshTopPerformerStats.forEachIndexed { index, _ ->
-            refreshTopPerformerStats[index] = true
-        }
-        refreshStoreStats.forEachIndexed { index, _ ->
-            refreshStoreStats[index] = true
-        }
-    }
 
     private fun getTotalSpendFormatted(totalSpend: BigDecimal, currency: String) =
         currencyFormatter.formatCurrency(
@@ -377,11 +369,14 @@ class MyStoreViewModel @Inject constructor(
         ) : VisitorStatsViewState()
     }
 
-    data class TopPerformersState(
-        val isLoading: Boolean = false,
-        val isError: Boolean = false,
-        val topPerformers: List<TopPerformerProductUiModel> = emptyList(),
-    )
+    sealed class TopPerformersViewState {
+        object Loading : TopPerformersViewState()
+        object Error : TopPerformersViewState()
+        data class Content(
+            val topPerformers: List<TopPerformerProductUiModel> = emptyList(),
+            val granularity: StatsGranularity
+        ) : TopPerformersViewState()
+    }
 
     sealed class OrderState {
         object Empty : OrderState()

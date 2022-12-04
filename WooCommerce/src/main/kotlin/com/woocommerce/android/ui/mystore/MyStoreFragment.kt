@@ -38,6 +38,7 @@ import com.woocommerce.android.ui.main.MainNavigationRouter
 import com.woocommerce.android.ui.mystore.MyStoreViewModel.MyStoreEvent.OpenTopPerformer
 import com.woocommerce.android.ui.mystore.MyStoreViewModel.OrderState
 import com.woocommerce.android.ui.mystore.MyStoreViewModel.RevenueStatsViewState
+import com.woocommerce.android.ui.mystore.MyStoreViewModel.TopPerformersViewState
 import com.woocommerce.android.ui.mystore.MyStoreViewModel.VisitorStatsViewState
 import com.woocommerce.android.util.ActivityUtils
 import com.woocommerce.android.util.CurrencyFormatter
@@ -198,10 +199,10 @@ class MyStoreFragment : TopLevelFragment(R.layout.fragment_my_store) {
             }
         }
         viewModel.topPerformersState.observe(viewLifecycleOwner) { topPerformers ->
-            when {
-                topPerformers.isLoading -> showTopPerformersLoading()
-                topPerformers.isError -> showTopPerformersError()
-                else -> showTopPerformers(topPerformers.topPerformers)
+            when (topPerformers) {
+                is TopPerformersViewState.Loading -> showTopPerformersLoading()
+                is TopPerformersViewState.Error -> showTopPerformersError()
+                is TopPerformersViewState.Content -> showTopPerformers(topPerformers.topPerformers)
             }
         }
         viewModel.hasOrders.observe(viewLifecycleOwner) { newValue ->
@@ -252,7 +253,7 @@ class MyStoreFragment : TopLevelFragment(R.layout.fragment_my_store) {
                 stat = AnalyticsEvent.FEATURE_JETPACK_BENEFITS_BANNER,
                 properties = mapOf(AnalyticsTracker.KEY_JETPACK_BENEFITS_BANNER_ACTION to "tapped")
             )
-            findNavController().navigateSafely(MyStoreFragmentDirections.actionMyStoreToJetpackBenefitsDialog())
+            //findNavController().navigateSafely(MyStoreFragmentDirections.actionMyStoreToJetpackBenefitsDialog())
         }
         val appBarLayout = appBarLayout ?: return
         // For the banner to be above the bottom navigation view when the toolbar is expanded

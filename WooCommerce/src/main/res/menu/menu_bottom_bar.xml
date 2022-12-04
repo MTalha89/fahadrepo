@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/dashboard"
-        android:icon="@drawable/as_menu_dashboard"
-        android:title="@string/my_store" />
+        android:id="@+id/products"
+        android:icon="@drawable/as_menu_products_list"
+        android:title="@string/products" />
 
     <item
         android:id="@+id/analytics"
@@ -17,10 +17,6 @@
         android:icon="@drawable/as_menu_orders_list"
         android:title="@string/orders" />
 
-    <item
-        android:id="@+id/products"
-        android:icon="@drawable/as_menu_products_list"
-        android:title="@string/products" />
 
     <item
         android:id="@+id/moreMenu"
